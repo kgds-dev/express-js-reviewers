@@ -2,6 +2,8 @@ const express = require('express');
 
 // routes
 const userRouter = require('./routes/users.router');
+const productsRouter = require('./routes/products.router');
+
 
 const app = express();
 const PORT = 3000;
@@ -20,6 +22,7 @@ app.post('/greeting', (req, res) => {
 });
 
 app.use('/users', userRouter);
+app.use('/products', productsRouter);
 
 // http://localhost:3000/change-password (HTTP PUT METHOD)
 
