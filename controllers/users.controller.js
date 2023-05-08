@@ -11,7 +11,7 @@ function changePassword(req, res) {
         const username = req.body.username
         const password = req.body.password 
     */
-    const { username, password } = req.body; // Input from postman
+    const { email, password } = req.body; // Input from postman
 
     // constant variables to hold messages
     const USER_NOT_FOUND = 'User does not exist';
@@ -31,17 +31,17 @@ function changePassword(req, res) {
 
 function addUser(req, res) {
     // destructured the body from the request
-    const { username, password } = req.body;
+    const { email, password, firstName, lastName } = req.body;
 
     // error handler if fields are empty or invalid
-    if (!username || !password) {
+    if (!email || !password || !firstName || !lastName) { // NaN = not a number 
        return res.status(400).json({
             error: 'Please fill out the complete information.'
        });
     }
 
-    usersModel.push({ username, password });
-    res.send(`User ${username} successfully registered!`);
+    usersModel.push({ email, password, firstName, lastName });
+    res.send(`User ${email} successfully registered!`);
 }
 
 
