@@ -45,8 +45,28 @@ function addUser(req, res) {
 }
 
 
+function login(req, res) {
+    const { email, password } = req.body;
+
+    const user = usersModel.find((user) => user.email === email && user.password === password);
+
+    if (user) {
+        res.status(200).json({
+            status: true,
+            message: 'Login Successfull'
+        });
+    } else {
+        res.status(200).json({
+            status: false,
+            message: 'Login failed, wrong credentials'
+        })
+    }
+}
+
+
 module.exports = {
     getAllUsers,
     changePassword,
-    addUser
+    addUser,
+    login
 };
