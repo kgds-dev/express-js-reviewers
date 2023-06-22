@@ -1,7 +1,10 @@
 let usersModel = require('../models/users.model');
+let usersMongo = require('../models/users.mongo');
 
 function getAllUsers(req, res) {
-    res.status(200).json(usersModel);
+    usersMongo.find({}).then(async (users) => {
+        await res.status(200).json(users);
+    })
 }
 
 function changePassword(req, res) {
@@ -47,14 +50,14 @@ function addUser(req, res) {
         return res.status(200).json({ status: false, errorName: 'lastName', message: 'Last name cannot be empty' });
     }
 
-    const duplicateEmail = usersModel.find(user => user.email === email);
-
-    if (!duplicateEmail) {
-        usersModel.push({ email, password, firstName, lastName });
-        res.status(200).json({ status: true, message: 'User successfully registered' });
-    } else {
-        return res.status(200).json({ message: 'Email already exists' });
-    }
+    usersMongo.find({email: email}).then(async (user) => {
+        if (!user.length) { // IF LENGHT = 0, CREATE NEW USER
+            await usersMongo.create({ email, password, firstName, lastName });
+            res.status(200).json({ status: true, message: 'User successfully registered' });
+        } else {
+            return res.status(200).json({ status: false, errorName: 'emailExists', message: 'Email already exists' });
+        }
+    });
 }
 
 
@@ -67,20 +70,27 @@ function login(req, res) {
         const password = req.body.password;
     */
     const { email, password } = req.body;
+    usersMongo.find({email: email, password: password}) // this parameter is like if condition (checks a document that is equal with the supplied email and password)
+    .then(user => {
+        if (!user.length) {
+            res.status(200).json({
+                status: false,
+                errorName: 'email',
+                message: 'Login failed, wrong credentials'
+            })
+        } else {
+            const response = usersMongo.updateMany(
+                { firstName: 'Felix' },
+                { lastName: 'Bakat' },
+            ).exec();
 
-    const user = usersModel.find((user) => user.email === email && user.password === password);
+            res.status(200).json({
+                status: true,
+                message: 'Login Successfull'
+            });
+        }
+    })
 
-    if (user) {
-        res.status(200).json({
-            status: true,
-            message: 'Login Successfull'
-        });
-    } else {
-        res.status(200).json({
-            status: false,
-            message: 'Login failed, wrong credentials'
-        })
-    }
 }
 
 

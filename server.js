@@ -1,38 +1,29 @@
-const express = require('express');
-const cors = require('cors');
+const http = require('http');
+const app = require('./app');
+const mongoose = require('mongoose');
 
-const app = express();
-const PORT = 8080;
+const PORT = process.env.PORT || 8000;
 
-// Register a middleware function that parses incoming JSON payloads/request
-app.use(express.json());
+// mongodb+srv://{USER_NAME}:{PASSWORD}@cluster0.9kf28c1.mongodb.net/{DATABASE_NAME}?retryWrites=true&w=majority
+const MONGO_URL = 'mongodb+srv://test-user:root123@cluster0.9kf28c1.mongodb.net/kodegoMongo?retryWrites=true&w=majority';
 
-app.use(cors({
-    origin: 'http://localhost:3000'
-}));
+const server = http.createServer(app);
 
-// middleware logger
-app.use((req, res, next) => {
-    const start = Date.now();
-    next();
-    const delta = Date.now() - start;
-    console.log(`${req.method} ${req.baseUrl}${req.url} ${delta}ms`);
+mongoose.connection.once('open', () => {
+    console.log('MongoDB Connected');
 });
 
-app.get('/', (req, res) => { //http://localhost:8080/
-    res.send('Hello World');
+mongoose.connection.on('error', (err) => {
+    console.error(err);
 });
 
-app.post('/greeting', (req, res) => { //http://localhost:8080/greeting
-    const name = req.body.name;
-    const greeting = `Hello Master ${name}`;
-    res.send(greeting);
-});
+async function startServer() {
+    await mongoose.connect(MONGO_URL);
+    
+    app.listen(PORT, () => {
+        console.log(`Server is listening to http://localhost:${PORT}`);
+    });
+}
 
-app.use('/users', require('./routes/users.router')); //http://localhost:8080/users
-app.use('/products', require('./routes/products.router')); //http://localhost:8080/products
+startServer();
 
-
-app.listen(PORT, () => {
-    console.log(`Server is listening to http://localhost:${PORT}`);
-});
